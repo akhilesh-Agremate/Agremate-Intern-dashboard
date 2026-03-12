@@ -8,16 +8,17 @@ import 'package:admin_dashboard/domain/entity/post/post.dart';
 import 'package:admin_dashboard/domain/entity/post/posts_response.dart';
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_by_date_widget/post_list_widget.dart';
 
+import '../../model/dashboard_menu.dart';
+import '../../provider/dashboard_menu_selection_provider.dart';
+
 class AllPostWidget extends ConsumerStatefulWidget {
   const AllPostWidget({super.key});
 
   @override
-  ConsumerState<AllPostWidget> createState() => _ALlPostWidgetState();
+  ConsumerState<AllPostWidget>createState()=>_ALlPostWidgetState();
 }
-
 class _ALlPostWidgetState extends ConsumerState<AllPostWidget> {
   final List<Post> postList = [];
-
   @override
   void initState() {
     super.initState();
@@ -25,7 +26,6 @@ class _ALlPostWidgetState extends ConsumerState<AllPostWidget> {
       _fetchAllPost(context);
     });
   }
-
   void _fetchAllPost(BuildContext context) async {
     LoadingDialog.show(context, AppTexts.allPostLoadingMessage);
     final getAllPostUseCase = ref.read(getAllPostUseCaseProvider);
@@ -43,7 +43,6 @@ class _ALlPostWidgetState extends ConsumerState<AllPostWidget> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(

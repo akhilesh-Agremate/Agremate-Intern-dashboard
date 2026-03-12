@@ -12,6 +12,9 @@ import 'package:admin_dashboard/domain/entity/post/post.dart';
 import 'package:admin_dashboard/domain/entity/post/post_operation_response.dart';
 import 'package:admin_dashboard/core/utils/utils.dart';
 import 'package:admin_dashboard/core/common/dialog_helper.dart';
+import 'package:admin_dashboard/presentation/feature/home/provider/dashboard_menu_selection_provider.dart';
+import 'package:admin_dashboard/presentation/feature/home/model/dashboard_menu.dart';
+import '../../provider/last_post_provider.dart';
 
 class PostDetailsWidget extends ConsumerWidget {
   PostDetailsWidget({this.post, super.key});
@@ -63,14 +66,20 @@ class PostDetailsWidget extends ConsumerWidget {
     }
 
     LoadingDialog.hide(context);
+
     if (apiResponse is SuccessResponse) {
       PostOperationResponse response =
           (apiResponse as SuccessResponse<PostOperationResponse>).data;
+
       showSnackBar(context, response.message);
-      Navigator.pop(context);
-    } else {
-      showSnackBar(context, (apiResponse as ErrorResponse).errorMessage);
+
+      _formKey.currentState?.reset();
+
+      _ref
+          .read(menuSelectionStateNotifierProvider.notifier)
+          .selectMenu(DashboardMenu.home);
     }
+
   }
 
   void _showSaveOrUpdateConfirmationDialog(BuildContext context) {
@@ -116,10 +125,16 @@ class PostDetailsWidget extends ConsumerWidget {
       PostOperationResponse response =
           (apiResponse as SuccessResponse<PostOperationResponse>).data;
       showSnackBar(context, response.message);
+      _ref.read(lastPostProvider.notifier).state = newPost;
       _formKey.currentState?.reset();
+
+      //go back to home
+      _ref
+      .read(menuSelectionStateNotifierProvider.notifier)
+      .selectMenu(DashboardMenu.home);
     } else {
-      showSnackBar(context, (apiResponse as ErrorResponse).errorMessage);
-    }
+       showSnackBar(context, (apiResponse as ErrorResponse).errorMessage);
+     }
   }
 
   void _updatePost(BuildContext context) async {

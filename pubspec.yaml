@@ -39,11 +39,11 @@ dependencies:
   awesome_dialog: ^3.1.0
   json_annotation: ^4.8.1
   dio: ^5.3.3
-  intl: ^0.20.2
+  intl: ^0.18.1
   json_serializable: ^6.7.1
   freezed: ^2.4.2
   flutter_riverpod: ^2.4.0
-  web: ^0.5.1
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -101,4 +101,5 @@ flutter:
   assets:
     - assets/images/company_logo.png
     - assets/images/app_logo.png
+    - assets/images/mountain.jpg
 

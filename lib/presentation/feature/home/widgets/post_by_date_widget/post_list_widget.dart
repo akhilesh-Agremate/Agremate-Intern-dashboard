@@ -32,7 +32,7 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
         return;
       }
       final List<Post> searchedItems = [];
-      for (Post post in _filteredPost) {
+            for (Post post in widget.allPost!){
         if (post.title.contains(query) ||
             post.description.contains(query) ||
             post.date.contains(query)) {
@@ -169,13 +169,14 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
             getCellContent(4, post.title, isOdd),
             getCellContent(4, post.description, isOdd),
             getCellContent(2, post.date, isOdd),
-            getCellContent(3, post.coverImageUrl, isOdd),
+            getImageCell(3, post.coverImageUrl, isOdd),
             getCellContent(3, post.postMobileUrl, isOdd),
           ],
         ),
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -252,4 +253,34 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
       ),
     );
   }
+}
+
+Widget getImageCell(int flex, String imageUrl, bool isOdd) {
+  return Expanded(
+    flex: flex,
+    child: Container(
+      padding: const EdgeInsets.all(8),
+      height: 80,
+      decoration: BoxDecoration(
+        color: isOdd ? Colors.white : Colors.black.withOpacity(0.05),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.5),
+          width: 1,
+        ),
+      ),
+      child: Center(
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          height: 60,
+            errorBuilder: (context, error, stackTrace) {
+              return Image.network(
+                "assets/images/mountain.jpg",
+                fit: BoxFit.cover,
+              );
+            }
+        ),
+      ),
+    ),
+  );
 }
