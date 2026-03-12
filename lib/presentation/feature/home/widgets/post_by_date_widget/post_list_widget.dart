@@ -17,6 +17,7 @@ class PostListWidget extends ConsumerStatefulWidget {
 }
 
 class _PostListWidgetState extends ConsumerState<PostListWidget> {
+  bool isAscending = true;
   final List<Post> _filteredPost = [];
   Timer? _debounce;
 
@@ -43,6 +44,15 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
         _filteredPost.clear();
         _filteredPost.addAll(searchedItems);
       });
+    });
+  }
+
+
+  // ascending
+  void sortById({required bool ascending}) {
+    setState(() {
+      _filteredPost.sort((a, b) =>
+      ascending ? a.id!.compareTo(b.id!) : b.id!.compareTo(a.id!));
     });
   }
 
@@ -97,6 +107,20 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
             AppTexts.postFilterHints,
             style: TextStyle(color: Colors.black),
           ),
+          // ascending
+          suffixIcon: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(onPressed:(){
+                sortById(ascending:true);
+              }, icon: const Icon(Icons.arrow_upward),
+              ),
+              // descending
+              IconButton(onPressed: (){
+                sortById(ascending:false);
+              }, icon:const Icon(Icons.arrow_downward))
+            ],
+          )
         ),
         onChanged: (value) {
           _onSearchChanged(value);
