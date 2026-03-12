@@ -40,6 +40,7 @@ class _PostListWidgetState extends ConsumerState<PostListWidget> {
         }
       }
 
+
       setState(() {
         _filteredPost.clear();
         _filteredPost.addAll(searchedItems);
