@@ -15,24 +15,17 @@ class AllPostWidget extends ConsumerStatefulWidget {
   const AllPostWidget({super.key});
 
   @override
-  ConsumerState<AllPostWidget> createState() => _ALlPostWidgetState();
+  ConsumerState<AllPostWidget>createState()=>_ALlPostWidgetState();
 }
-
-
-
 class _ALlPostWidgetState extends ConsumerState<AllPostWidget> {
   final List<Post> postList = [];
-
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _fetchAllPost(context);
-
-
     });
   }
-
   void _fetchAllPost(BuildContext context) async {
     LoadingDialog.show(context, AppTexts.allPostLoadingMessage);
     final getAllPostUseCase = ref.read(getAllPostUseCaseProvider);
@@ -50,7 +43,6 @@ class _ALlPostWidgetState extends ConsumerState<AllPostWidget> {
       });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(
