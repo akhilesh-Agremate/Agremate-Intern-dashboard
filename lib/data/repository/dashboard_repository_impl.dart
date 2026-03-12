@@ -22,14 +22,13 @@ class DashboardRepositoryImpl extends DashboardRepository {
       final statusCode = response.statusCode ?? 500;
       if (statusCode >= 200 && statusCode < 400) {
         final postOperationResponse =
-            PostOperationResponse.fromJson(response.data);
+        PostOperationResponse.fromJson(response.data);
         return SuccessResponse<PostOperationResponse>(
             statusCode: statusCode, data: postOperationResponse);
       }
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
         statusCode: 200, errorMessage: "Something went wrong. Try later.");
   }
@@ -37,20 +36,17 @@ class DashboardRepositoryImpl extends DashboardRepository {
   @override
   Future<ApiResponse> deletePost(int id) async {
     try {
-      //final response = await client.delete("/posts/${id}");
-      // For mock api purpose
       final response = await client.delete("/posts");
       final statusCode = response.statusCode ?? 500;
       if (statusCode >= 200 && statusCode < 400) {
         final postOperationResponse =
-            PostOperationResponse.fromJson(response.data);
+        PostOperationResponse.fromJson(response.data);
         return SuccessResponse<PostOperationResponse>(
             statusCode: statusCode, data: postOperationResponse);
       }
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
         statusCode: 200, errorMessage: "Something went wrong. Try later.");
   }
@@ -71,33 +67,42 @@ class DashboardRepositoryImpl extends DashboardRepository {
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
         statusCode: 500, errorMessage: "Something went wrong");
   }
 
   @override
-  Future<ApiResponse> getPostByDate(PostByDateRequest postByDateRequest) async {
+  Future<ApiResponse> getPostByDate(
+      PostByDateRequest postByDateRequest) async {
     try {
-      final requestBody = postByDateRequest.toJson();
-      final response = await client.post("/posts", data: requestBody);
+      final response = await client.get("/posts");
       final statusCode = response.statusCode ?? 500;
+
       if (statusCode >= 200 && statusCode < 400) {
         final postsResponse = PostsResponse.fromJson(response.data);
+        final String selectedDate = postByDateRequest.date.trim();
+
+        final List<Post> filteredPosts = postsResponse.posts.where((post) {
+          final String postDate = post.date.length >= 10
+              ? post.date.substring(0, 10)
+              : post.date;
+          return postDate == selectedDate;   // ← exact date match
+        }).take(postByDateRequest.max)       // ← respect max limit
+            .toList();
+        final PostsResponse filteredResponse =
+        PostsResponse(posts: filteredPosts);
         return SuccessResponse<PostsResponse>(
-            statusCode: statusCode, data: postsResponse);
+            statusCode: statusCode, data: filteredResponse);
       }
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
-        statusCode: 200, errorMessage: "Something went wrong. Try later.");
+        statusCode: 500, errorMessage: "Something went wrong. Try later.");
   }
 
   @override
   Future<ApiResponse> getPostById(int id) {
-    // TODO: implement getPostById
     throw UnimplementedError();
   }
 
@@ -115,7 +120,6 @@ class DashboardRepositoryImpl extends DashboardRepository {
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
         statusCode: 200, errorMessage: "Invalid Credential");
   }
@@ -124,20 +128,17 @@ class DashboardRepositoryImpl extends DashboardRepository {
   Future<ApiResponse> updatePost(Post post) async {
     try {
       final postJson = post.toJson();
-      //final response = await client.put("/posts/${post.id}", data: postJson);
-      // For Testing Purpose
       final response = await client.put("/posts");
       final statusCode = response.statusCode ?? 500;
       if (statusCode >= 200 && statusCode < 400) {
         final postOperationResponse =
-            PostOperationResponse.fromJson(response.data);
+        PostOperationResponse.fromJson(response.data);
         return SuccessResponse<PostOperationResponse>(
             statusCode: statusCode, data: postOperationResponse);
       }
     } catch (e) {
       print(e.toString());
     }
-
     return const ErrorResponse(
         statusCode: 200, errorMessage: "Something went wrong. Try later.");
   }
