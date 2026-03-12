@@ -10,5 +10,5 @@ abstract class DashboardRepository {
   Future<ApiResponse> addPost(Post post);
   Future<ApiResponse> updatePost(Post post);
   Future<ApiResponse> deletePost(int id);
-  Future<ApiResponse> getPostById(int id);
+
 }

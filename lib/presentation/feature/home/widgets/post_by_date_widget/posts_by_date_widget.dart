@@ -11,7 +11,6 @@ import 'package:admin_dashboard/domain/entity/post/posts_response.dart';
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_by_date_widget/post_list_widget.dart';
 import 'package:admin_dashboard/core/common/dialog_helper.dart';
 import 'package:admin_dashboard/core/constants/app_constants.dart';
-import '../../provider/last_post_provider.dart';
 
 class PostByDateWidget extends ConsumerStatefulWidget {
   const PostByDateWidget({super.key});
@@ -21,23 +20,13 @@ class PostByDateWidget extends ConsumerStatefulWidget {
 }
 
 class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
-  final TextEditingController _dateInputController = TextEditingController();
+  TextEditingController _dateInputController = TextEditingController();
   late TextEditingController _maxInputController;
   final List<Post> _filteredPost = [];
-
-
 
   @override
   void initState() {
     _maxInputController = TextEditingController(text: "30");
-
-    _dateInputController.text =
-        DateFormat(kDateFormat).format(DateTime.now());
-
-    Future.microtask(() {
-      _fetchPostByDate();
-    });
-
     super.initState();
   }
 
@@ -46,7 +35,7 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2010),
-      lastDate: DateTime(2025),
+      lastDate: DateTime(2050),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -66,8 +55,10 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
       },
     );
     if (pickedDate != null) {
-      String formattedDate = DateFormat(kDateFormat).format(pickedDate);
-      _dateInputController.text = formattedDate;
+      String formattedDate = DateFormat("yyyy-MM-dd").format(pickedDate);
+      setState(() {
+        _dateInputController.text = formattedDate;
+      });
     }
   }
 
@@ -104,89 +95,130 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
       setState(() {
         _filteredPost.addAll(postsResponse.posts);
       });
+      if (_filteredPost.isEmpty) {
+        showInfoDialog(
+          context: context,
+          title: 'No Posts Found',
+          message:
+          'No posts found for date: ${_dateInputController.text}',
+        );
+      }
+    } else {
+      showInfoDialog(
+        context: context,
+        title: 'Error',
+        message: 'Failed to fetch posts. Please try again.',
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final lastPost = ref.watch(lastPostProvider); //added
     return Container(
-        padding: const EdgeInsets.only(
-          top: 32,
-          bottom: 0,
-          left: 16,
-          right: 16,
-        ),
-        width: double.infinity,
-        height: double.infinity,
-        child: Column(
-          children: [
-            Row(
-              children: [
-                SizedBox(
-                  width: 150,
-                  height: 50,
-                  child: TextFormField(
-                    onTap: () {
-                      _showDatePicker(context);
-                    },
-                    readOnly: true,
-                    controller: _dateInputController,
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
-                    decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      filled: true,
-                      suffixIcon: Icon(Icons.calendar_month_sharp),
-                      border: OutlineInputBorder(),
-                      label: Text(
-                        AppTexts.selectDate,
-                        style: TextStyle(color: Colors.black87),
-                      ),
+      padding: const EdgeInsets.only(
+        top: 32,
+        bottom: 0,
+        left: 16,
+        right: 16,
+      ),
+      width: double.infinity,
+      height: double.infinity,
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 150,
+                height: 50,
+                child: TextFormField(
+                  onTap: () {
+                    _showDatePicker(context);
+                  },
+                  readOnly: true,
+                  controller: _dateInputController,
+                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  decoration: const InputDecoration(
+                    fillColor: Colors.white,
+                    filled: true,
+                    suffixIcon: Icon(Icons.calendar_month_sharp),
+                    border: OutlineInputBorder(),
+                    label: Text(
+                      AppTexts.selectDate,
+                      style: TextStyle(color: Colors.black87),
                     ),
                   ),
                 ),
-                const SizedBox(
-                  width: 24,
-                ),
-                SizedBox(
-                  width: 70,
-                  height: 40,
-                  child: TextFormField(
-                    controller: _maxInputController,
-                    style: const TextStyle(color: Colors.black, fontSize: 16),
-                    decoration: const InputDecoration(
-                      fillColor: Colors.white,
-                      filled: true,
-                      border: OutlineInputBorder(),
-                      label: Text(
-                        AppTexts.max,
-                        style: TextStyle(color: Colors.black87),
-                      ),
+              ),
+              const SizedBox(
+                  width: 24
+              ),
+             SizedBox(
+                width: 70,
+                height: 40,
+                child: TextFormField(
+                  controller: _maxInputController,
+                  keyboardType: TextInputType.number,
+                  style: const TextStyle(color: Colors.black, fontSize: 16),
+                  decoration: const InputDecoration(
+                    fillColor: Colors.white,
+                    filled: true,
+                    border: OutlineInputBorder(),
+                    label: Text(
+                      AppTexts.max,
+                      style: TextStyle(color: Colors.black87),
                     ),
                   ),
                 ),
-                const SizedBox(
-                  width: 24,
+              ),
+              const SizedBox(
+                  width: 24
+              ),
+              ElevatedButton(
+                onPressed: _fetchPostByDate,
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black),
+                child: const Text(
+                  AppTexts.getPostByDate,
+                  style: TextStyle(color: Colors.white),
                 ),
+              ),
+
+              const SizedBox(width: 16),
+
+              if (_filteredPost.isNotEmpty)
                 ElevatedButton(
                   onPressed: () {
-                    _fetchPostByDate();
+                    setState(() {
+                      _filteredPost.clear();
+                      _dateInputController.clear();
+                    });
                   },
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red),
                   child: const Text(
-                    AppTexts.getPostByDate,
+                    'Clear',
                     style: TextStyle(color: Colors.white),
                   ),
-                )
-              ],
+                ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          if (_dateInputController.text.isNotEmpty)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Showing posts for: ${_dateInputController.text} '
+                    '(${_filteredPost.length} found)',
+                style: const TextStyle(
+                  color: Colors.black54,
+                  fontSize: 13,
+                ),
+              ),
             ),
-            const SizedBox(height: 32),
-            PostListWidget(
-              allPost: lastPost != null ? [lastPost] : _filteredPost,
-            ),
-          ],
-        ));
+          const SizedBox(height: 8),
+          PostListWidget(allPost: _filteredPost),
+        ],
+      ),
+    );
   }
 }

@@ -97,7 +97,6 @@ Widget _addAlertDialogTitle(BuildContext context) {
     ],
   );
 }
-
 Widget _addDialogContent(Post post) {
   return SingleChildScrollView(
     child: PostDetailsWidget(
