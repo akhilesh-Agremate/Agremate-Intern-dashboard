@@ -102,11 +102,6 @@ class DashboardRepositoryImpl extends DashboardRepository {
   }
 
   @override
-  Future<ApiResponse> getPostById(int id) {
-    throw UnimplementedError();
-  }
-
-  @override
   Future<ApiResponse> login(LoginRequest loginRequest) async {
     try {
       final data = loginRequest.toJson();
