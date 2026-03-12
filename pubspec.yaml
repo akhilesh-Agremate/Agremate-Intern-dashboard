@@ -43,6 +43,7 @@ dependencies:
   json_serializable: ^6.7.1
   freezed: ^2.4.2
   flutter_riverpod: ^2.4.0
+  web: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -100,4 +101,5 @@ flutter:
   assets:
     - assets/images/company_logo.png
     - assets/images/app_logo.png
+    - assets/images/mountain.jpg
 

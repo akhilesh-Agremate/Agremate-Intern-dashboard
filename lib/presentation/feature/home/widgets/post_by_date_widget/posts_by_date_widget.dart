@@ -11,6 +11,7 @@ import 'package:admin_dashboard/domain/entity/post/posts_response.dart';
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_by_date_widget/post_list_widget.dart';
 import 'package:admin_dashboard/core/common/dialog_helper.dart';
 import 'package:admin_dashboard/core/constants/app_constants.dart';
+import '../../provider/last_post_provider.dart';
 
 class PostByDateWidget extends ConsumerStatefulWidget {
   const PostByDateWidget({super.key});
@@ -20,13 +21,23 @@ class PostByDateWidget extends ConsumerStatefulWidget {
 }
 
 class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
-  TextEditingController _dateInputController = TextEditingController();
+  final TextEditingController _dateInputController = TextEditingController();
   late TextEditingController _maxInputController;
   final List<Post> _filteredPost = [];
+
+
 
   @override
   void initState() {
     _maxInputController = TextEditingController(text: "30");
+
+    _dateInputController.text =
+        DateFormat(kDateFormat).format(DateTime.now());
+
+    Future.microtask(() {
+      _fetchPostByDate();
+    });
+
     super.initState();
   }
 
@@ -40,13 +51,13 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: Colors.white, // <-- SEE HERE
-              onPrimary: Color.fromARGB(255, 9, 107, 187), // <-- SEE HERE
-              onSurface: Colors.black, // <-- SEE HERE
+              primary: Colors.white,
+              onPrimary: Color.fromARGB(255, 9, 107, 187),
+              onSurface: Colors.black,
             ),
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
-                foregroundColor: Colors.blue, // button text color
+                foregroundColor: Colors.blue,
               ),
             ),
           ),
@@ -98,6 +109,8 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
 
   @override
   Widget build(BuildContext context) {
+
+    final lastPost = ref.watch(lastPostProvider); //added
     return Container(
         padding: const EdgeInsets.only(
           top: 32,
@@ -170,7 +183,9 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
               ],
             ),
             const SizedBox(height: 32),
-            PostListWidget(allPost: _filteredPost),
+            PostListWidget(
+              allPost: lastPost != null ? [lastPost] : _filteredPost,
+            ),
           ],
         ));
   }
