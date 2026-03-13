@@ -1,3 +1,4 @@
+import 'package:admin_dashboard/domain/entity/post/post.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:admin_dashboard/core/constants/app_constants.dart';
@@ -12,6 +13,8 @@ import 'package:admin_dashboard/presentation/feature/home/widgets/all_post_widge
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_by_date_widget/posts_by_date_widget.dart';
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_details_widget/post_details_widget.dart';
 import 'package:admin_dashboard/core/routing/routes.dart';
+
+import '../provider/last_post_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -36,6 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     ref.watch(menuSelectionProvider);
     DashboardMenu selectedMenu = ref.read(menuSelectionProvider);
+    final lastPost = ref.watch(lastPostProvider);
     return Scaffold(
       body: Container(
         color: Colors.white,
@@ -70,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 margin: const EdgeInsets.only(top: 100),
                 color: AppColors.background,
                 width: double.infinity,
-                child: getWidgetByMenuSelection(selectedMenu),
+                child: getWidgetByMenuSelection(selectedMenu, lastPost),
               ),
             )
           ],
@@ -149,7 +153,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget getWidgetByMenuSelection(DashboardMenu menu) {
+  Widget getWidgetByMenuSelection(DashboardMenu menu,Post? lastPost) {
     switch (menu) {
       case DashboardMenu.home:
         return const PostByDateWidget();

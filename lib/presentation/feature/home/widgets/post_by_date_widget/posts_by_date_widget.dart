@@ -10,7 +10,7 @@ import 'package:admin_dashboard/domain/entity/post/post_by_date_request.dart';
 import 'package:admin_dashboard/domain/entity/post/posts_response.dart';
 import 'package:admin_dashboard/presentation/feature/home/widgets/post_by_date_widget/post_list_widget.dart';
 import 'package:admin_dashboard/core/common/dialog_helper.dart';
-import 'package:admin_dashboard/core/constants/app_constants.dart';
+import '../../provider/posts_provider.dart';
 
 class PostByDateWidget extends ConsumerStatefulWidget {
   const PostByDateWidget({super.key});
@@ -22,14 +22,15 @@ class PostByDateWidget extends ConsumerStatefulWidget {
 class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
   TextEditingController _dateInputController = TextEditingController();
   late TextEditingController _maxInputController;
-  final List<Post> _filteredPost = [];
 
   @override
   void initState() {
-    _maxInputController = TextEditingController(text: "30");
     super.initState();
-  }
+    _maxInputController = TextEditingController(text: "30");
+    _dateInputController.text = DateFormat("yyyy-MM-dd").format(DateTime.now());
 
+    Future.microtask(() => _fetchPostByDate());
+  }
   void _showDatePicker(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -84,18 +85,17 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
     final getPostByDateUseCase = ref.read(getPostByDateUseCaseProvider);
     getPostByDateUseCase.setParam(postByDateRequest);
     final ApiResponse apiResponse = await getPostByDateUseCase.execute();
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
+
     LoadingDialog.hide(context);
     if (apiResponse is SuccessResponse) {
       final PostsResponse postsResponse =
           (apiResponse as SuccessResponse<PostsResponse>).data;
-      _filteredPost.clear();
-      setState(() {
-        _filteredPost.addAll(postsResponse.posts);
-      });
-      if (_filteredPost.isEmpty) {
+      // ref.read(postsProvider.notifier).clear();
+      ref.read(postsProvider.notifier).addAllPosts(postsResponse.posts);
+      final filteredPosts = ref.read(postsProvider).where((p) => p.date == _dateInputController.text).toList();
+     // if no post found msg vl be like this
+      if (filteredPosts.isEmpty) {
         showInfoDialog(
           context: context,
           title: 'No Posts Found',
@@ -111,9 +111,10 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
       );
     }
   }
-
   @override
   Widget build(BuildContext context) {
+    final allPosts = ref.watch(postsProvider);
+    final posts = allPosts.where((p) => p.date == _dateInputController.text).toList();
     return Container(
       padding: const EdgeInsets.only(
         top: 32,
@@ -185,13 +186,11 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
 
               const SizedBox(width: 16),
 
-              if (_filteredPost.isNotEmpty)
+              if (posts.isNotEmpty)
                 ElevatedButton(
                   onPressed: () {
-                    setState(() {
-                      _filteredPost.clear();
-                      _dateInputController.clear();
-                    });
+                    ref.read(postsProvider.notifier).removePostsByDate(_dateInputController.text);
+                    _dateInputController.clear();
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red),
@@ -208,7 +207,7 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
               alignment: Alignment.centerLeft,
               child: Text(
                 'Showing posts for: ${_dateInputController.text} '
-                    '(${_filteredPost.length} found)',
+                    '(${posts.length} found)',
                 style: const TextStyle(
                   color: Colors.black54,
                   fontSize: 13,
@@ -216,7 +215,7 @@ class _PostByDateWidgetState extends ConsumerState<PostByDateWidget> {
               ),
             ),
           const SizedBox(height: 8),
-          PostListWidget(allPost: _filteredPost),
+          PostListWidget(allPost: posts),
         ],
       ),
     );

@@ -15,6 +15,7 @@ import 'package:admin_dashboard/core/common/dialog_helper.dart';
 import 'package:admin_dashboard/presentation/feature/home/provider/dashboard_menu_selection_provider.dart';
 import 'package:admin_dashboard/presentation/feature/home/model/dashboard_menu.dart';
 import '../../provider/last_post_provider.dart';
+import '../../provider/posts_provider.dart';
 
 class PostDetailsWidget extends ConsumerWidget {
   PostDetailsWidget({this.post, super.key});
@@ -73,6 +74,9 @@ class PostDetailsWidget extends ConsumerWidget {
 
       showSnackBar(context, response.message);
 
+      // store the newly created post
+      // _ref.read(lastPostProvider.notifier).state = newPost;
+
       _formKey.currentState?.reset();
 
       _ref
@@ -102,39 +106,45 @@ class PostDetailsWidget extends ConsumerWidget {
   }
 
   void _savePost(BuildContext context) async {
+    final formattedDate = DateFormat("yyyy-MM-dd").format(DateTime.now());
+
     final newPost = Post(
       title: _enteredTitle,
       description: _enteredDescription,
-      date: dateInputController.text,
+      date: formattedDate, // <- Use formatted today date
       active: int.parse(_enteredActive),
       coverImageUrl: _enteredCoverImageUrl,
       postWebUrl: _enteredPostMobileUrl,
       postMobileUrl: _enteredPostMobileUrl,
       viewCount: int.parse(_enteredViewCount),
     );
+
     LoadingDialog.show(context, AppTexts.savingPostWait);
     final addPostUseCase = _ref.read(addPostUseCaseProvider);
     addPostUseCase.setParam(newPost);
     ApiResponse apiResponse = await addPostUseCase.execute();
-    if (!context.mounted) {
-      return;
-    }
+    if (!context.mounted) return;
 
     LoadingDialog.hide(context);
     if (apiResponse is SuccessResponse) {
       PostOperationResponse response =
           (apiResponse as SuccessResponse<PostOperationResponse>).data;
+
       showSnackBar(context, response.message);
+
+      // ✅ Update lastPostProvider to show on Home page
       _ref.read(lastPostProvider.notifier).state = newPost;
+      _ref.read(postsProvider.notifier).addPost(newPost);
+
       _formKey.currentState?.reset();
 
-      //go back to home
+      // go back to home
       _ref
-      .read(menuSelectionStateNotifierProvider.notifier)
-      .selectMenu(DashboardMenu.home);
+          .read(menuSelectionStateNotifierProvider.notifier)
+          .selectMenu(DashboardMenu.home);
     } else {
-       showSnackBar(context, (apiResponse as ErrorResponse).errorMessage);
-     }
+      showSnackBar(context, (apiResponse as ErrorResponse).errorMessage);
+    }
   }
 
   void _updatePost(BuildContext context) async {
